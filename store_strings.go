@@ -6,13 +6,16 @@ import (
   "fmt"
   "strings"
   "sync"
+  "crypto/sha512"
 )
 
 func (s *Store) GetStrIdx(srch string) *WordAddress {
 	fname := s.GetStrFileName(srch)
+	s.lock.Lock()
 	if _, ok := s.locks[fname]; !ok {
 		s.locks[fname] = new(sync.RWMutex)
 	}
+	s.lock.Unlock()
 	s.locks[fname].RLock()
 	defer s.locks[fname].RUnlock()
 	strf, err := s.open(fname)
@@ -38,9 +41,11 @@ func (s *Store) GetStrIdx(srch string) *WordAddress {
 }
 
 func (s *Store) GetIdxStr(addr *WordAddress) (string, error) {
+	s.lock.Lock()
 	if _, ok := s.locks[addr.File]; !ok {
 		s.locks[addr.File] = new(sync.RWMutex)
 	}
+	s.lock.Unlock()
 	s.locks[addr.File].RLock()
 	defer s.locks[addr.File].RUnlock()
 	strf, e := s.open(addr.File)
@@ -67,9 +72,11 @@ func (s *Store) GetIdxStr(addr *WordAddress) (string, error) {
 
 func (s *Store) writeStr(str string) error {
 	fname := s.GetStrFileName(str)
+	s.lock.Lock()
 	if _, ok := s.locks[fname]; !ok {
 		s.locks[fname] = new(sync.RWMutex)
 	}
+	s.lock.Unlock()
 	s.locks[fname].Lock()
 	defer s.locks[fname].Unlock()
 	strf, err := s.openOrCreate(fname)
@@ -97,7 +104,9 @@ func (s *Store) PutStr(str string) (*WordAddress, error) {
 }
 
 func (s *Store) GetStrFileName(str string) string {
-	return fmt.Sprintf("str/%x", str[0])
+	h := sha512.New()
+	io.WriteString(h, strings.TrimRight(str, "\n"))
+	return fmt.Sprintf("str/%s", fmt.Sprintf("%x", h.Sum(nil))[:4])
 }
 
 func (s *Store) IsStrFileName(str string) bool {

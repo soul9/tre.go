@@ -31,6 +31,7 @@ func newrnd(file string) (*rnd, error) {
 	}
 	r.f = f
 	max, e := r.f.Seek(0, 2)
+	max = max-1
 	if e != nil {
 		return nil, e
 	}
@@ -54,7 +55,6 @@ func (r *rnd) putbuf() {
 		panic(e)
 	}
 	r.l.Lock()
-	defer r.l.Unlock()
 	_, e = r.f.Seek(idx.Int64(), 0)
 	if e != nil {
 		panic(e)
@@ -68,6 +68,7 @@ func (r *rnd) putbuf() {
 	if e != nil {
 		panic(e)
 	}
+	r.l.Unlock()
 	r.buf <-str
 }
 func (r *rnd) word() string {

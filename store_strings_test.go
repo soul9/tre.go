@@ -10,7 +10,7 @@ func TestStringStore(t *testing.T) {
 	if addr := s.GetStrIdx("doesntexist"); addr.Line != -1 {
 		t.Errorf("Tried to get nonexistant string, but got %#v", addr)
 	}
-	r, e := newrnd("/usr/share/dict/cracklib-small")
+	r, e := newrnd("/tmp/quads")
 	if e != nil {
 		panic(e)
 	}

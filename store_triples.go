@@ -6,7 +6,7 @@ import (
   "fmt"
   "strings"
   "sync"
-  "crypto/md5"
+  "crypto/sha512"
 )
 
 type Triple struct {
@@ -39,7 +39,7 @@ func (t *Triple) String() string {
 }
 
 func (t *Triple) FileName() string {
-	h := md5.New()
+	h := sha512.New()
 	io.WriteString(h, t.Source.String())
 	return fmt.Sprintf("%x", h.Sum(nil))[:4]
 }

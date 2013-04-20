@@ -17,6 +17,7 @@ type WordAddress struct {
 // A store in RootDir directory
 type Store struct {
 	RootDir	string
+	lock *sync.RWMutex
 	locks map[string]*sync.RWMutex
 }
 
@@ -49,7 +50,7 @@ func NewStore(root string) (*Store, error) {
 	if err := mkDirOrExist(fmt.Sprintf("%s/trpl", root)); err != nil {
 		return nil, reterr("NewStore", err)
 	}
-	return &Store{root, make(map[string]*sync.RWMutex)}, nil
+	return &Store{root, new(sync.RWMutex), make(map[string]*sync.RWMutex)}, nil
 }
 
 // Creates a new store in RAM (/dev/shm/)
